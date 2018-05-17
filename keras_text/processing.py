@@ -281,15 +281,16 @@ class Tokenizer(object):
 
         # Remove tokens with freq < min_token_count
         token_counts = list(self._token_counts.items())
-        token_counts = filter(lambda x: x[1] >= min_token_count, token_counts)
+        # token_counts = filter(lambda x: x[1] >= min_token_count, token_counts)
 
         # Clip to max_tokens.
         if max_tokens is not None:
-            token_counts.sort(key=lambda x: x[1], reverse=True)
-            filtered_tokens = zip(*token_counts)[0]
+            token_counts = sorted((x for x in token_counts if x[1] >= min_token_count), reverse=True, key=lambda x: x[1])
+            filtered_tokens = list(zip(*token_counts))[0]
             filtered_tokens = filtered_tokens[:max_tokens]
         else:
-            filtered_tokens = zip(*token_counts)[0]
+            token_counts = filter(lambda x: x[1] >= min_token_count, token_counts)
+            filtered_tokens = list(zip(*token_counts))[0]
 
         # Generate indices based on filtered tokens.
         self.create_token_indices(filtered_tokens)
@@ -326,7 +327,7 @@ class Tokenizer(object):
             progbar.update(indices[0])
 
         # All done. Finalize progressbar.
-        progbar.update(len(texts), force=True)
+        progbar.update(len(texts))
         return encoded_texts
 
     def decode_texts(self, encoded_texts, unknown_token="<UNK>", inplace=True):
@@ -380,7 +381,7 @@ class Tokenizer(object):
         # All done. Finalize progressbar update and count tracker.
         count_tracker.finalize()
         self._counts = count_tracker.counts
-        progbar.update(len(texts), force=True)
+        progbar.update(len(texts))
 
     def get_counts(self, i):
         """Numpy array of count values for aux_indices. For example, if `token_generator` generates

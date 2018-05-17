@@ -29,7 +29,7 @@ class TokenModelFactory(object):
 
         if embedding_type is not None:
             self.embeddings_index = get_embeddings_index(embedding_type)
-            self.embedding_dims = self.embeddings_index.values()[0].shape[-1]
+            self.embedding_dims = list(self.embeddings_index.values())[0].shape[-1]
         else:
             self.embeddings_index = None
             self.embedding_dims = embedding_dims
@@ -56,7 +56,6 @@ class TokenModelFactory(object):
         if not token_encoder_model.allows_dynamic_length() and self.max_tokens is None:
             raise ValueError("The provided `token_encoder_model` does not allow variable length mini-batches. "
                              "You need to provide `max_tokens`")
-
         if self.embeddings_index is None:
             # The +1 is for unknown token index 0.
             embedding_layer = Embedding(len(self.token_index) + 1,
